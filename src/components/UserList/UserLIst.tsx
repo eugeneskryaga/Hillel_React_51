@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from "react";
+import { useCallback, useMemo, useState, type ChangeEvent } from "react";
 import type { User } from "../../types/types";
 import { UserItem } from "../UserItem/UserItem";
 
@@ -8,30 +8,49 @@ interface Props {
 
 export const UserList = ({ data }: Props) => {
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("age");
-  const filteredUsers = [...data]
-    .filter(user => user.name.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => {
-      if (sort === "name") {
-        return a.name.localeCompare(b.name);
-      }
-      if (sort === "age") {
-        return Number(a.age) - Number(b.age);
-      }
-      return 0;
-    });
+  const [sort, setSort] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [highlight30, setHighlight30] = useState(false);
 
-  const handleSearch = (
-    event: ChangeEvent<HTMLInputElement, HTMLInputElement>,
-  ) => {
-    setSearch(event.target.value);
-  };
+  const filteredUsers = useMemo(
+    () =>
+      [...data]
+        .filter(user => user.name.toLowerCase().includes(search.toLowerCase()))
+        .sort((a, b) => {
+          if (sort === "name") {
+            return a.name.localeCompare(b.name);
+          }
+          if (sort === "age") {
+            return Number(a.age) - Number(b.age);
+          }
+          return 0;
+        }),
+    [data, search, sort],
+  );
 
-  const handleSort = (
-    event: ChangeEvent<HTMLSelectElement, HTMLSelectElement>,
-  ) => {
-    setSort(event.target.value);
-  };
+  const handleSearch = useCallback(
+    (event: ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
+      setSearch(event.target.value);
+    },
+    [],
+  );
+
+  const handleSort = useCallback(
+    (event: ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
+      setSort(event.target.value);
+    },
+    [],
+  );
+
+  const handleSelectUser = useCallback((id: string) => {
+    setSelectedUsers(prev =>
+      prev.includes(id) ? prev.filter(userId => userId !== id) : [...prev, id],
+    );
+  }, []);
+
+  const handleToggleHighlight = useCallback(() => {
+    setHighlight30(prev => !prev);
+  }, []);
 
   return (
     <>
@@ -50,11 +69,16 @@ export const UserList = ({ data }: Props) => {
         <option value="name">За ім'ям</option>
         <option value="age">За віком</option>
       </select>
-      <button>Обрати старших 30</button>
+      <button onClick={handleToggleHighlight}>Обрати старших 30</button>
       <ul>
         {filteredUsers.map(user => (
           <li key={user.id}>
-            <UserItem item={user} />
+            <UserItem
+              item={user}
+              onSelect={handleSelectUser}
+              isSelected={selectedUsers.includes(user.id)}
+              isHighlighted={highlight30 && Number(user.age) > 30}
+            />
           </li>
         ))}
       </ul>

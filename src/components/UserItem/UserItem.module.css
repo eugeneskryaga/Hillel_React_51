@@ -1,0 +1,16 @@
+.card {
+    cursor: pointer;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.selected {
+    background-color: #d4f8d4;
+}
+
+.highlighted {
+    background-color: #fff3cd;
+}
