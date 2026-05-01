@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState, type ChangeEvent } from "react";
-import type { User } from "../../types/types";
+import type { Sort, User } from "../../types/types";
 import { UserItem } from "../UserItem/UserItem";
+import { Controls } from "../Controls/Controls";
 
 interface Props {
   data: User[];
@@ -8,7 +9,7 @@ interface Props {
 
 export const UserList = ({ data }: Props) => {
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState<Sort>("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [highlight30, setHighlight30] = useState(false);
 
@@ -21,7 +22,7 @@ export const UserList = ({ data }: Props) => {
             return a.name.localeCompare(b.name);
           }
           if (sort === "age") {
-            return Number(a.age) - Number(b.age);
+            return a.age - b.age;
           }
           return 0;
         }),
@@ -36,9 +37,9 @@ export const UserList = ({ data }: Props) => {
   );
 
   const handleSort = useCallback(
-    (event: ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
-      setSort(event.target.value);
-    },
+    (event: ChangeEvent<HTMLSelectElement, HTMLSelectElement>) =>
+      setSort(event.target.value as Sort),
+
     [],
   );
 
@@ -54,22 +55,13 @@ export const UserList = ({ data }: Props) => {
 
   return (
     <>
-      <label>
-        Пошук:
-        <input
-          type="text"
-          name="search"
-          onChange={event => handleSearch(event)}
-        />
-      </label>
-      <select
-        name="sort"
-        onChange={event => handleSort(event)}
-      >
-        <option value="name">За ім'ям</option>
-        <option value="age">За віком</option>
-      </select>
-      <button onClick={handleToggleHighlight}>Обрати старших 30</button>
+      <Controls
+        search={search}
+        sort={sort}
+        onSearch={handleSearch}
+        onSort={handleSort}
+        onToggleHighlight={handleToggleHighlight}
+      />
       <ul>
         {filteredUsers.map(user => (
           <li key={user.id}>
@@ -77,7 +69,7 @@ export const UserList = ({ data }: Props) => {
               item={user}
               onSelect={handleSelectUser}
               isSelected={selectedUsers.includes(user.id)}
-              isHighlighted={highlight30 && Number(user.age) > 30}
+              isHighlighted={highlight30 && user.age > 30}
             />
           </li>
         ))}
