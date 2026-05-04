@@ -31,6 +31,7 @@ export const Controls = ({
         value={sort}
         onChange={onSort}
       >
+        <option value="none">Без сортування</option>
         <option value="name">За ім'ям</option>
         <option value="age">За віком</option>
       </select>

@@ -4,4 +4,4 @@ export interface User {
   age: number;
 }
 
-export type Sort = "name" | "age" | "";
+export type Sort = "name" | "age" | "none";
